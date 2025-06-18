@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-export const validateLoginData = Yup.object({
+export const loginValidationSchema = Yup.object({
   email: Yup.string()
     .email("Invalid email format")
     .required("Email must be required"),

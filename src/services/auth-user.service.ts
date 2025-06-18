@@ -20,7 +20,7 @@ export const authUserRegister = async (user: Partial<UserType>) => {
 export const authUserLogin = async (user: Partial<UserType>) => {
   try {
     const res = await axios.post(API + "auth-user/login", user);
-
+    // console.log(res.data);
     return res.data;
   } catch (error: any) {
     console.log("error occur in login user ");

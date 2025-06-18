@@ -8,10 +8,10 @@ import EditEvent from "./EditEvent";
 import { useEffect, useState } from "react";
 import { getEventById } from "@/services/event.service";
 import { EventType } from "@/@types/event.type";
+import { CategoryType } from "@/@types/categories.type";
 export const EventPreView = () => {
   const [event, setEvent] = useState<EventType>();
   const { id } = useParams();
-  console.log(event);
   if (!id) return <h1>404 Not Found</h1>;
 
   useEffect(() => {
@@ -46,7 +46,9 @@ export const EventPreView = () => {
 
             <Badge size="lg" className="uppercase tracking-wide">
               Event Type:
-              {event?.categories?.map((cat: any) => <span>{cat.name}</span>)}
+              {event?.categories?.map((cat: CategoryType) => (
+                <span key={cat._id}>{cat.name}</span>
+              ))}
             </Badge>
 
             <DecryptedText

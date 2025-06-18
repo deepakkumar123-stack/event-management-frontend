@@ -1,6 +1,6 @@
 import { UserType } from "@/@types/user.type";
 import { authUserRegister } from "@/services/auth-user.service";
-import { validateSigupData } from "@/validSchema/use-register-validate-schema";
+import { validateSigupData } from "@/validSchema/registerValidationSchema";
 import { Avatar, Image } from "@heroui/react";
 import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";

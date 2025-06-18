@@ -32,7 +32,7 @@ import { useFormik } from "formik";
 // import { IoAdd } from "react-icons/io5";
 import { FiEdit } from "react-icons/fi";
 // import { useEvent } from "@/store/event.store";
-import { validateEventData } from "@/validSchema/event-validate-schema";
+import { validateEventData } from "@/validSchema/event-validation-schema";
 import { useEffect, useState } from "react";
 import { getCategories } from "@/services/category.service";
 

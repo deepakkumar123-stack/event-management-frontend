@@ -10,6 +10,7 @@ import {
   Select,
   SelectItem,
   Tooltip,
+  addToast,
 } from "@heroui/react";
 
 // Import React FilePond
@@ -30,9 +31,11 @@ import "react-quill/dist/quill.snow.css";
 import { EventType } from "@/@types/event.type";
 import { useFormik } from "formik";
 import { IoAdd } from "react-icons/io5";
-import { validateEventData } from "@/validSchema/event-validate-schema";
+import { validateEventData } from "@/validSchema/event-validation-schema";
 import { useEffect, useState } from "react";
 import { getCategories } from "@/services/category.service";
+import { createEvent } from "@/services/event.service";
+import { CategoryType } from "@/@types/categories.type";
 
 // Register the plugins
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
@@ -50,15 +53,17 @@ export default function AddEvents() {
       setCategories(data);
       // return res;
     } catch (error) {
-      throw new Error("error in fetching categories");
+      addToast({
+        title: "Toast title",
+        description: "error in fetching categories",
+        color: "danger",
+      });
     }
   };
 
   useEffect(() => {
     fetchCategories();
   }, []);
-  console.log("it is cat", categories);
-
   const initialValues: Partial<EventType> = {
     title: "",
     location: "",
@@ -70,9 +75,22 @@ export default function AddEvents() {
   const eventFormik = useFormik<Partial<EventType>>({
     initialValues,
     validationSchema: validateEventData,
-    onSubmit: (values, { resetForm }) => {
+    onSubmit: async (values, { resetForm }) => {
+      const event: Partial<EventType> = {
+        title: values.title,
+        description: values.description,
+        location: values.location,
+
+        categories: values.categories,
+      };
+
+      try {
+        await createEvent(event);
+
+        resetForm();
+      } catch (error) {}
+
       console.log(values);
-      resetForm();
     },
   });
 
@@ -194,7 +212,7 @@ export default function AddEvents() {
                       selectionMode="multiple"
                       {...eventFormik.getFieldProps("categories")}
                     >
-                      {categories?.map((cat: any) => (
+                      {categories?.map((cat: CategoryType) => (
                         <SelectItem key={cat._id}>{cat.name}</SelectItem>
                       ))}
                     </Select>

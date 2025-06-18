@@ -1,5 +1,8 @@
 import { Route, Routes } from "react-router-dom";
 import { lazy, PropsWithChildren, Suspense } from "react";
+import { setupAxios } from "./@config/_setup.axios";
+import axios from "axios";
+import { ToastProvider } from "@heroui/react";
 // Written by tirth
 // const Login = lazy(() =>
 //   import("./modules/auth-users/Login").then((module) => ({
@@ -11,7 +14,7 @@ import { lazy, PropsWithChildren, Suspense } from "react";
 //     default: module.SignUp,
 //   }))
 // );
-// setupAxios(axios);
+setupAxios(axios);
 
 const AuthLogin = lazy(() =>
   import("./modules/auth-users/AuthLogin").then((module) => ({
@@ -56,6 +59,7 @@ export const SuspenseView: React.FC<PropsWithChildren> = ({ children }) => {
 function App() {
   return (
     <>
+      <ToastProvider />
       <SuspenseView>
         <Routes>
           <Route element={<Home />} path="/" />
