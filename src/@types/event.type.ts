@@ -6,7 +6,7 @@ export interface EventType {
   description: string;
   location: string;
   bannerUrl: string;
-  categories: string;
+  categories: string[];
   createdBy: UserType;
   createdAt?: string;
   updatedAt?: string;

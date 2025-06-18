@@ -1,32 +1,31 @@
 import { UserType } from "@/@types/user.type";
+import { authUserLogin } from "@/services/auth-user.service";
+import { validateLoginData } from "@/validSchema/user-login-vlidate-schema";
 import { Image } from "@heroui/react";
 import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
-import * as Yup from "yup";
 
 export const AuthLogin = () => {
   const navigate = useNavigate();
 
-  const validateLoginData = Yup.object({
-    email: Yup.string()
-      .email("Invalid email format")
-      .required("Email must be required"),
-    password: Yup.string()
-      .required("Password must be required")
-      .min(6, "Password must be at least 6 characters"),
-  });
-  const initialValues: Partial<UserType> = {
-    email: "",
-    password: "",
-  };
-
   const loginFormik = useFormik<Partial<UserType>>({
-    initialValues,
+    initialValues: { email: "", password: "" },
     validationSchema: validateLoginData,
-    onSubmit: (values, { resetForm }) => {
-      console.log(values);
-      resetForm();
-      navigate("/events");
+    onSubmit: async (values, { resetForm }) => {
+      const user: Partial<UserType> = {
+        email: values.email,
+        password: values.password,
+      };
+      try {
+        const { data } = await authUserLogin(user);
+
+        localStorage.setItem("token", data.token); //set token to localStorage
+
+        resetForm();
+        navigate("/events");
+      } catch (error) {
+        console.log("error");
+      }
     },
   });
   const checkFormError = (field: keyof UserType): boolean => {

@@ -1,29 +1,15 @@
 import { UserType } from "@/@types/user.type";
+import { authUserRegister } from "@/services/auth-user.service";
+import { validateSigupData } from "@/validSchema/use-register-validate-schema";
 import { Avatar, Image } from "@heroui/react";
 import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
-import * as Yup from "yup";
 
 export const AuthSignUp = () => {
   const navigate = useNavigate();
   type _createUserBody = Pick<UserType, "name" | "email" | "password"> & {
     confirmpassword: string;
   };
-  const validateSigupData = Yup.object({
-    name: Yup.string()
-      .required("Name must be required")
-      .min(3, "Name at least 3 char")
-      .max(20, "Name must be less than 20 char"),
-    email: Yup.string()
-      .email("Invalid email format")
-      .required("Email must be required"),
-    password: Yup.string()
-      .required("Password must be required")
-      .min(6, "Password must be at least 6 characters"),
-    confirmpassword: Yup.string()
-      .required("Confirm password must be required")
-      .oneOf([Yup.ref("password")], "Passwords must match"),
-  });
 
   const initialValues: Partial<_createUserBody> = {
     name: "",
@@ -35,10 +21,21 @@ export const AuthSignUp = () => {
   const signUpFormik = useFormik<Partial<_createUserBody>>({
     initialValues,
     validationSchema: validateSigupData,
-    onSubmit: (values, { resetForm }) => {
+    onSubmit: async (values, { resetForm }) => {
+      const user: Partial<UserType> = {
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      };
+      try {
+        await authUserRegister(user);
+        resetForm();
+        navigate("/auth-login");
+      } catch (error) {
+        console.log(`Registration failed: ${error as Error}`);
+      }
+
       console.log(values);
-      resetForm();
-      navigate("/auth-login");
     },
   });
 

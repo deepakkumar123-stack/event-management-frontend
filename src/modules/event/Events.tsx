@@ -15,53 +15,72 @@ import {
 } from "@heroui/react";
 import AddEvents from "./AddEvents";
 import { Link } from "react-router-dom";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AnimatedContent from "@/reactbits.ui/AnimatedContent";
-const events = [
-  {
-    id: 1,
-    title: "Acme camera",
-    img: "https://heroui.com/images/card-example-4.jpeg",
-  },
-  {
-    id: 2,
-    title: "Acme camera",
-    img: "https://heroui.com/images/card-example-6.jpeg",
-  },
-  {
-    id: 3,
-    title: "Acme camera",
-    img: "https://heroui.com/images/card-example-3.jpeg",
-  },
-  {
-    id: 4,
-    title: "Acme camera",
-    img: "https://heroui.com/images/card-example-4.jpeg",
-  },
-  {
-    id: 5,
-    title: "Acme camera",
-    img: "https://heroui.com/images/card-example-3.jpeg",
-  },
-  {
-    id: 6,
-    title: "Acme camera",
-    img: "https://heroui.com/images/card-example-6.jpeg",
-  },
-  {
-    id: 7,
-    title: "Acme camera",
-    img: "https://img.bookchor.com/bookchor/ltb-img/author-image/2025041575395.jpg",
-  },
-  {
-    id: 8,
-    title: "Acme camera",
-    img: "https://content.jdmagicbox.com/v2/comp/gandhinagar-gujarat/r1/9999pxx79.xx79.240712114316.t4r1/catalogue/samarth-events-gandhinagar-sector-26-gandhinagar-gujarat-birthday-party-organisers-s6ui6rbcno.jpg",
-  },
-];
+import { getEvents } from "@/services/event.service";
+import { EventType } from "@/@types/event.type";
+// const events = [
+//   {
+//     id: 1,
+//     title: "Acme camera",
+//     img: "https://heroui.com/images/card-example-4.jpeg",
+//   },
+//   {
+//     id: 2,
+//     title: "Acme camera",
+//     img: "https://heroui.com/images/card-example-6.jpeg",
+//   },
+//   {
+//     id: 3,
+//     title: "Acme camera",
+//     img: "https://heroui.com/images/card-example-3.jpeg",
+//   },
+//   {
+//     id: 4,
+//     title: "Acme camera",
+//     img: "https://heroui.com/images/card-example-4.jpeg",
+//   },
+//   {
+//     id: 5,
+//     title: "Acme camera",
+//     img: "https://heroui.com/images/card-example-3.jpeg",
+//   },
+//   {
+//     id: 6,
+//     title: "Acme camera",
+//     img: "https://heroui.com/images/card-example-6.jpeg",
+//   },
+
+//   {
+//     id: 7,
+//     title: "Acme camera",
+//     img: "https://img.bookchor.com/bookchor/ltb-img/author-image/2025041575395.jpg",
+//   },
+//   {
+//     id: 8,
+//     title: "Acme camera",
+//     img: "https://content.jdmagicbox.com/v2/comp/gandhinagar-gujarat/r1/9999pxx79.xx79.240712114316.t4r1/catalogue/samarth-events-gandhinagar-sector-26-gandhinagar-gujarat-birthday-party-organisers-s6ui6rbcno.jpg",
+//   },
+// ];
 
 export const Events = () => {
   const [isLoaded, setIsLoaded] = React.useState(false);
+
+  const [events, setEvent] = useState<EventType[]>([]);
+
+  const fetchEvent = async () => {
+    try {
+      const { data } = await getEvents();
+      setEvent(data);
+    } catch (error) {
+      throw new Error("fetching event data ");
+    }
+  };
+  console.log("events", events);
+
+  useEffect(() => {
+    fetchEvent();
+  }, []);
 
   const toggleLoad = () => {
     setIsLoaded(!isLoaded);
@@ -77,10 +96,11 @@ export const Events = () => {
           <AddEvents />
         </div>
         <div className="flex flex-wrap gap-4 justify-center   mx-4 mt-5">
-          {events.map((event) => {
+          {events?.map((event: EventType) => {
             return (
               <>
                 <AnimatedContent
+                  key={event._id}
                   distance={150}
                   direction="vertical"
                   reverse={false}
@@ -103,9 +123,7 @@ export const Events = () => {
                         </p>
                       </Skeleton>
                       <Skeleton isLoaded={isLoaded}>
-                        <h4 className="text-white font-medium text-2xl">
-                          Acme camera{" "}
-                        </h4>
+                        <h4 className=" font-medium text-2xl">{event.title}</h4>
                       </Skeleton>
                     </CardHeader>
                     <Skeleton isLoaded={isLoaded}>
@@ -113,7 +131,7 @@ export const Events = () => {
                         removeWrapper
                         alt="Card example background"
                         className="z-1 w-full h-full rounded-md scale-125 -translate-y-6 object-cover"
-                        src={event.img}
+                        src={event.bannerUrl}
                       />
                     </Skeleton>
 
@@ -145,7 +163,7 @@ export const Events = () => {
                             radius="full"
                             size="sm"
                             as={Link}
-                            to="/events/:id"
+                            to={`/events/${event._id}`}
                           >
                             Click me
                           </Button>

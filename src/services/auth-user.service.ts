@@ -4,7 +4,9 @@ const API = import.meta.env.VITE_BASE_URL;
 
 export const authUserRegister = async (user: Partial<UserType>) => {
   try {
+    console.log("check user data ", user);
     const res = await axios.post(API + "auth-user/register", user);
+    // console.log("response data", res.data);
     return res.data;
   } catch (error: any) {
     console.log(

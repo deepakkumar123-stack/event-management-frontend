@@ -9,7 +9,7 @@ const Layout = () => {
     location.pathname.includes("/auth-login") ||
     location.pathname.includes("/auth-sign");
 
-  console.log("Current Path:", loco);
+  // console.log("Current Path:", loco);
 
   return (
     <div className="bg-neutral-100 flex flex-col gap-2">
