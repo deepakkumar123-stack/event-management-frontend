@@ -1,32 +1,36 @@
 import { UserType } from "@/@types/user.type";
-import { Image } from "@heroui/react";
+import { authUserLogin } from "@/services/auth-user.service";
+import { loginValidationSchema } from "@/validSchema/validation-schema";
+import { addToast, Image } from "@heroui/react";
 import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
-import * as Yup from "yup";
 
 export const AuthLogin = () => {
   const navigate = useNavigate();
 
-  const validateLoginData = Yup.object({
-    email: Yup.string()
-      .email("Invalid email format")
-      .required("Email must be required"),
-    password: Yup.string()
-      .required("Password must be required")
-      .min(6, "Password must be at least 6 characters"),
-  });
-  const initialValues: Partial<UserType> = {
-    email: "",
-    password: "",
-  };
-
   const loginFormik = useFormik<Partial<UserType>>({
-    initialValues,
-    validationSchema: validateLoginData,
-    onSubmit: (values, { resetForm }) => {
-      console.log(values);
-      resetForm();
-      navigate("/events");
+    initialValues: { email: "", password: "" },
+    validationSchema: loginValidationSchema,
+    onSubmit: async (values, { resetForm }) => {
+      const user: Partial<UserType> = {
+        email: values.email,
+        password: values.password,
+      };
+      try {
+        const { data } = await authUserLogin(user);
+        // console.log(data);
+        localStorage.setItem("token", data.token); //set token to localStorage
+        console.log("login successfully....");
+        addToast({
+          title: "Toast log title",
+          description: "error in fetching categories",
+          color: "danger",
+        });
+        resetForm();
+        navigate("/events");
+      } catch (error) {
+        console.log("error");
+      }
     },
   });
   const checkFormError = (field: keyof UserType): boolean => {

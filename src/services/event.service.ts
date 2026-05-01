@@ -9,8 +9,8 @@ export const getEvents = async (categories: string[] = []) => {
     const jointCategories = categories.join(",");
     params.append("categories", jointCategories);
 
-    const res = await axios.get(`${API}event?${params.toString()}`);
-    return res.data;
+    const { data } = await axios.get(`${API}event?${params.toString()}`);
+    return data.data;
   } catch (error: any) {
     console.log("error occur in get events ");
     throw (

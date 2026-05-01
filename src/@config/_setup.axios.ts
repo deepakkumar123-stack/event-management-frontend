@@ -1,4 +1,4 @@
-import { _getAuthToken } from "@/store/store";
+import { _getAuthToken } from "@/store/auth-user.store";
 
 export function setupAxios(axios: any) {
   axios.defaults.headers.Accept = "application/json";

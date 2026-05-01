@@ -1,11 +1,25 @@
 import BlurText from "@/reactbits.ui/BlureText";
 import DecryptedText from "@/reactbits.ui/DecryptedText";
 import { Image, Badge, User, Button } from "@heroui/react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { FiTrash2 } from "react-icons/fi";
 import AnimatedContent from "@/reactbits.ui/AnimatedContent";
 import EditEvent from "./EditEvent";
+import { useEffect, useState } from "react";
+import { getEventById } from "@/services/event.service";
+import { EventType } from "@/@types/event.type";
+import { CategoryType } from "@/@types/categories.type";
 export const EventPreView = () => {
+  const [event, setEvent] = useState<EventType>();
+  const { id } = useParams();
+  if (!id) return <h1>404 Not Found</h1>;
+
+  useEffect(() => {
+    if (id) {
+      getEventById(id).then(({ data }) => setEvent(data));
+    }
+  }, [id]);
+
   return (
     <div className="h-lvh w-lvw flex flex-row bg-neutral-100 overflow-hidden">
       <div className="w-1/2 flex flex-col justify-center px-10 bg-neutral-50 shadow-lg">
@@ -22,10 +36,8 @@ export const EventPreView = () => {
           delay={0.3}
         >
           <div className="flex flex-col items-center gap-5">
-            <div>Content to Animate</div>
-
             <BlurText
-              text="Book Show"
+              text={event?.title}
               delay={150}
               animateBy="words"
               direction="top"
@@ -33,11 +45,14 @@ export const EventPreView = () => {
             />
 
             <Badge size="lg" className="uppercase tracking-wide">
-              Event Type: Book Fair
+              Event Type:
+              {event?.categories?.map((cat: CategoryType) => (
+                <span key={cat._id}>{cat.name}</span>
+              ))}
             </Badge>
 
             <DecryptedText
-              text="Discover our most popular and newly released titles. From bestselling fiction to must-read nonfiction, find stories that captivate and ideas that spark curiosity."
+              text={event?.description || "hey its your event"}
               animateOn="view"
               revealDirection="center"
               className="font-medium text-neutral-700 text-center max-w-lg"
@@ -101,7 +116,7 @@ export const EventPreView = () => {
           <Image
             alt="Event background"
             className="object-cover w-full h-full rounded-none"
-            src="https://img.bookchor.com/bookchor/ltb-img/author-image/2025041575395.jpg"
+            src={event?.bannerUrl}
           />
         </AnimatedContent>
       </div>

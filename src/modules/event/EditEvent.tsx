@@ -1,7 +1,3 @@
-// export const AddEvents = () => {
-//   return <div></div>;
-// };
-
 import {
   Drawer,
   DrawerContent,
@@ -11,7 +7,6 @@ import {
   Button,
   useDisclosure,
   Input,
-  DatePicker,
   Select,
   SelectItem,
   Tooltip,
@@ -32,51 +27,46 @@ import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
 
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import * as Yup from "yup";
 import { EventType } from "@/@types/event.type";
 import { useFormik } from "formik";
 // import { IoAdd } from "react-icons/io5";
 import { FiEdit } from "react-icons/fi";
+// import { useEvent } from "@/store/event.store";
+import { validateEventData } from "@/validSchema/event-validation-schema";
+import { useEffect, useState } from "react";
+import { getCategories } from "@/services/category.service";
 
 // Register the plugins
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
 
-export const animals = [
-  { key: "cat", label: "Cat" },
-  { key: "dog", label: "Dog" },
-  { key: "elephant", label: "Elephant" },
-  { key: "lion", label: "Lion" },
-  { key: "tiger", label: "Tiger" },
-  { key: "giraffe", label: "Giraffe" },
-];
 // const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 // const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
 
 export default function EditEvent() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [categories, setCategories] = useState([]);
 
-  const validateEventData = Yup.object({
-    title: Yup.string()
-      .required("Event title must be required")
-      .min(3, "Event title at least 10 char")
-      .max(20, "Name must be less than 20 char"),
-    date: Yup.date().required(" date is required"),
-    description: Yup.string()
-      .required("Decription must be required")
-      .min(20, "Decription must be at least 20 characters")
-      .max(200, "Decription must be less than 200 char"),
-    categories: Yup.string()
-      .min(1, "Select at least one category")
-      .required("Categories must be required"),
-    files: Yup.mixed().required("File is required"),
-  });
+  const fetchCategories = async () => {
+    try {
+      const { data } = await getCategories();
+      setCategories(data);
+      // return res;
+    } catch (error) {
+      throw new Error("error in fetching categories");
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+  console.log("it is cat", categories);
 
   const initialValues: Partial<EventType> = {
     title: "",
-    date: "",
+    location: "",
     description: "",
-    categories: "",
-    files: "",
+    categories: [],
+    bannerUrl: "",
   };
 
   const eventFormik = useFormik<Partial<EventType>>({
@@ -173,22 +163,17 @@ export default function EditEvent() {
                       </span>
                     )}
                   </div>
-                  <div
-                    key={"bordered"}
-                    className="flex w-full flex-wrap md:flex-nowrap mb-6 md:mb-0 gap-4"
-                  >
-                    <DatePicker
-                      label={"Date"}
+                  <div>
+                    <Input
+                      label="Location"
                       labelPlacement="outside"
-                      variant={"bordered"}
-                      onChange={(date) =>
-                        eventFormik.setFieldValue("date", date)
-                      }
-                      onBlur={() => eventFormik.setFieldTouched("date", true)}
+                      placeholder="Enter your location"
+                      variant="bordered"
+                      {...eventFormik.getFieldProps("location")}
                     />
-                    {checkFormError("date") && (
+                    {checkFormError("location") && (
                       <span className="text-red-500 text-xs">
-                        {eventFormik.errors.date}
+                        {eventFormik.errors.location}
                       </span>
                     )}
                   </div>
@@ -220,8 +205,8 @@ export default function EditEvent() {
                       selectionMode="multiple"
                       {...eventFormik.getFieldProps("categories")}
                     >
-                      {animals.map((animal) => (
-                        <SelectItem key={animal.key}>{animal.label}</SelectItem>
+                      {categories.map((cat: any) => (
+                        <SelectItem key={cat._id}>{cat.name}</SelectItem>
                       ))}
                     </Select>
                     {checkFormError("categories") && (
@@ -239,7 +224,7 @@ export default function EditEvent() {
                       maxFiles={1}
                       onupdatefiles={(fileItems) => {
                         eventFormik.setFieldValue(
-                          "files",
+                          "bannerUrl",
                           fileItems.map((f) => f.file)
                         );
                       }}
@@ -247,9 +232,9 @@ export default function EditEvent() {
                       labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
                       {...eventFormik.getFieldProps("files")}
                     />
-                    {checkFormError("files") && (
+                    {checkFormError("bannerUrl") && (
                       <span className="text-red-500 text-xs">
-                        {eventFormik.errors.files}
+                        {eventFormik.errors.bannerUrl}
                       </span>
                     )}
                   </div>
