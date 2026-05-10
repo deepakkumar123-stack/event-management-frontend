@@ -31,14 +31,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const _logout = () => {
     setToken(undefined);
     localStorage.removeItem("token");
-    navigate("/event");
+    localStorage.removeItem("user");
+    navigate("/events");
   };
   useEffect(() => {
     const handleStorageChange = () => {
       const updatedToken = localStorage.getItem("token") || undefined;
       setToken(updatedToken);
       if (!updatedToken) {
-        navigate("/event");
+        navigate("/events");
       }
     };
     window.addEventListener("storage", handleStorageChange);

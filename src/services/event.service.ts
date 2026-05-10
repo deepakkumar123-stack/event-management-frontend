@@ -1,4 +1,3 @@
-import { EventType } from "@/@types/event.type";
 import axios from "axios";
 
 const API = import.meta.env.VITE_BASE_URL;
@@ -55,20 +54,20 @@ export const deleteEventById = async (_id: string) => {
 };
 
 //for createing event
-export const createEvent = async (event: Partial<EventType>) => {
+export const createEvent = async (event: FormData) => {
   try {
     await axios.post(API + "event", event);
   } catch (error: any) {
     console.log("error occur in create event ");
     throw (
       error?.response?.data?.message || {
-        message: "An unknown error occurred.",
+        message: "An create event error occurred.",
       }
     );
   }
 };
 // for update event
-export const updateEvent = async (_id: string, event: Partial<EventType>) => {
+export const updateEvent = async (_id: string, event: FormData) => {
   try {
     const res = await axios.patch(API + "event" + `/${_id}`, event);
     if (!res) {

@@ -1,12 +1,12 @@
 import BlurText from "@/reactbits.ui/BlureText";
 import DecryptedText from "@/reactbits.ui/DecryptedText";
-import { Image, Badge, User, Button } from "@heroui/react";
+import { Image, Badge, User, Button, addToast } from "@heroui/react";
 import { Link, useParams } from "react-router-dom";
 import { FiTrash2 } from "react-icons/fi";
 import AnimatedContent from "@/reactbits.ui/AnimatedContent";
 import EditEvent from "./EditEvent";
 import { useEffect, useState } from "react";
-import { getEventById } from "@/services/event.service";
+import { deleteEventById, getEventById } from "@/services/event.service";
 import { EventType } from "@/@types/event.type";
 import { CategoryType } from "@/@types/categories.type";
 export const EventPreView = () => {
@@ -19,6 +19,23 @@ export const EventPreView = () => {
       getEventById(id).then(({ data }) => setEvent(data));
     }
   }, [id]);
+  console.log(event);
+  const onDeleteProduct = async (id: string) => {
+    try {
+      await deleteEventById(id);
+      addToast({
+        title: " delete event",
+        description: " succsefully..",
+        color: "danger",
+      });
+    } catch (error: any) {
+      addToast({
+        title: "Failed to delete event",
+        description: error,
+        color: "danger",
+      });
+    }
+  };
 
   return (
     <div className="h-lvh w-lvw flex flex-row bg-neutral-100 overflow-hidden">
@@ -62,7 +79,7 @@ export const EventPreView = () => {
           <div className="mt-10 flex flex-col items-center gap-3">
             <User
               avatarProps={{
-                src: "https://ui-avatars.com/api/?name=deepak kumar",
+                src: `${event?.createdBy.avatar}`,
                 size: "lg",
               }}
               name="Deepak Kumar"
@@ -73,25 +90,18 @@ export const EventPreView = () => {
                   rel="noopener noreferrer"
                   className="text-blue-600 text-sm hover:underline"
                 >
-                  @deepak123
+                  @{event?.createdBy.name}
                 </Link>
               }
             />
 
             <div className="flex gap-4 mt-2">
-              {/* <Button
-                color="primary"
-                size="md"
-                className="flex items-center gap-2"
-              >
-                <FiEdit className="text-lg" />
-                Edit <EditEvent />
-              </Button> */}
               <EditEvent />
               <Button
                 color="danger"
                 size="md"
                 className="flex items-center gap-2"
+                onClick={() => onDeleteProduct(event?._id)}
               >
                 <FiTrash2 className="text-lg" />
                 Delete

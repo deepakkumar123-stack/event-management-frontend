@@ -10,6 +10,7 @@ import {
   Select,
   SelectItem,
   Tooltip,
+  addToast,
 } from "@heroui/react";
 
 // Import React FilePond
@@ -35,6 +36,10 @@ import { FiEdit } from "react-icons/fi";
 import { validateEventData } from "@/validSchema/event-validation-schema";
 import { useEffect, useState } from "react";
 import { getCategories } from "@/services/category.service";
+import { useParams } from "react-router-dom";
+import { getEventById, updateEvent } from "@/services/event.service";
+import { CategoryType } from "@/@types/categories.type";
+import { FilePondFile } from "filepond";
 
 // Register the plugins
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
@@ -45,12 +50,23 @@ registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
 export default function EditEvent() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [categories, setCategories] = useState([]);
+  // const [files, setFiles] = useState<FilePondFile[]>([]);
+  const [event, setEvent] = useState<EventType>();
+
+  const [files, setFiles] = useState<FilePondFile[]>([]);
+  const { id } = useParams();
+  if (!id) return <h1>404 Not Found</h1>;
+
+  useEffect(() => {
+    if (id) {
+      getEventById(id).then(({ data }) => setEvent(data));
+    }
+  }, [id]);
 
   const fetchCategories = async () => {
     try {
       const { data } = await getCategories();
       setCategories(data);
-      // return res;
     } catch (error) {
       throw new Error("error in fetching categories");
     }
@@ -59,22 +75,44 @@ export default function EditEvent() {
   useEffect(() => {
     fetchCategories();
   }, []);
-  console.log("it is cat", categories);
 
   const initialValues: Partial<EventType> = {
-    title: "",
-    location: "",
-    description: "",
-    categories: [],
-    bannerUrl: "",
+    title: event?.title || "",
+    location: event?.location || "",
+    description: event?.description || "",
+    categories: event?.categories || [],
+    bannerUrl: event?.bannerUrl || "",
   };
 
   const eventFormik = useFormik<Partial<EventType>>({
+    enableReinitialize: true,
     initialValues,
     validationSchema: validateEventData,
-    onSubmit: (values, { resetForm }) => {
-      console.log(values);
-      resetForm();
+    onSubmit: async (values, { resetForm }: { resetForm: () => void }) => {
+      const formData = new FormData();
+      formData.append("title", values.title || "");
+      formData.append("location", values.location || "");
+      formData.append("description", values.description || "");
+      const catIds = values.categories?.map((cat) => cat);
+      formData.append("categories", catIds?.join(",") || "");
+
+      if (files && files.length > 0) {
+        formData.append("banner", files[0].file);
+      }
+      try {
+        await updateEvent(id, formData);
+        resetForm();
+        setFiles([]);
+
+        addToast({ title: "Event updated" });
+      } catch (error: any) {
+        console.error("error in update event::", error);
+        addToast({
+          title: "Failed to update event",
+          description: error,
+          color: "danger",
+        });
+      }
     },
   });
 
@@ -112,15 +150,6 @@ export default function EditEvent() {
           <FiEdit className="text-lg" />
           Edit
         </Button>
-        {/* <Button
-          className="bg-gradient-to-tr h-16   from-pink-500 to-yellow-500 text-white shadow-lg"
-          
-          radius="full"
-          size="sm"
-          variant="shadow"
-        >
-          <IoAdd />
-        </Button> */}
       </Tooltip>
 
       <Drawer
@@ -203,12 +232,16 @@ export default function EditEvent() {
                       labelPlacement="outside"
                       placeholder="Select categories"
                       selectionMode="multiple"
-                      {...eventFormik.getFieldProps("categories")}
+                      onSelectionChange={(keys) => {
+                        const selectedArray = Array.from(keys) as string[];
+                        eventFormik.setFieldValue("categories", selectedArray);
+                      }}
                     >
-                      {categories.map((cat: any) => (
+                      {categories?.map((cat: CategoryType) => (
                         <SelectItem key={cat._id}>{cat.name}</SelectItem>
                       ))}
                     </Select>
+
                     {checkFormError("categories") && (
                       <span className="text-red-500 text-xs">
                         {eventFormik.errors.categories}
@@ -219,18 +252,20 @@ export default function EditEvent() {
                   <div className="flex flex-col gap-2">
                     <label htmlFor="files">Upload Image</label>
                     <FilePond
+                      files={files}
                       credits={false}
                       allowMultiple={true}
                       maxFiles={1}
                       onupdatefiles={(fileItems) => {
-                        eventFormik.setFieldValue(
-                          "bannerUrl",
-                          fileItems.map((f) => f.file)
+                        setFiles(fileItems);
+                        const uploadedUrl = URL.createObjectURL(
+                          fileItems[0]?.file
                         );
+
+                        eventFormik.setFieldValue("bannerUrl", uploadedUrl);
                       }}
-                      id="files"
+                      id="bannerUrl"
                       labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-                      {...eventFormik.getFieldProps("files")}
                     />
                     {checkFormError("bannerUrl") && (
                       <span className="text-red-500 text-xs">

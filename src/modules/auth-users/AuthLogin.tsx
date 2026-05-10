@@ -20,6 +20,8 @@ export const AuthLogin = () => {
         const { data } = await authUserLogin(user);
         // console.log(data);
         localStorage.setItem("token", data.token); //set token to localStorage
+        localStorage.setItem("user", JSON.stringify(data.user));
+        //set user to localStorage
         console.log("login successfully....");
         addToast({
           title: "Toast log title",

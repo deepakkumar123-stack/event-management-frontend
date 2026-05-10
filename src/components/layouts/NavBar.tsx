@@ -7,10 +7,12 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  User,
 } from "@heroui/react";
-
+import { useAuth } from "@/store/auth-user.store";
 const NavBar = () => {
+  const userString = localStorage.getItem("user");
+  const user = userString ? JSON.parse(userString) : null;
+  const { _logout } = useAuth();
   return (
     <header className="sticky top-0 w-full z-40 bg-white/30 backdrop-filter backdrop-blur-lg shadow-sm ">
       <ClickSpark
@@ -22,69 +24,62 @@ const NavBar = () => {
       >
         <nav
           aria-label="Global"
-          className="mx-auto  flex max-w-7xl items-center justify-between p-6 lg:px-8"
+          className="mx-auto  flex max-w-7xl items-center justify-between p-4 sm:px-6 lg:px-8"
         >
-          {/* <div className="flex lg:flex-1 z-16">
-          <Link to="/" className="-m-1.5 p-1.5">
-            <span className="sr-only">Your Company</span>
-            <img
-              alt=""
-              src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-              className="h-8 w-auto"
-            />
-          </Link>
-        </div> */}
-
-          <div className="hidden lg:flex lg:gap-x-12">
-            <Link to="/" className="text-sm/6 font-semibold text-gray-900">
+          <div className="flex gap-6">
+            <Link
+              to="/"
+              className="text-sm font-semibold text-gray-900 hover:text-blue-600"
+            >
               Home
             </Link>
             <Link
               to="/events"
-              className="text-sm/6 font-semibold text-gray-900"
+              className="text-sm font-semibold text-gray-900 hover:text-blue-600"
             >
               Events
             </Link>
           </div>
-          {/* <div className="absolute right-[8%]">
-            <Dropdown placement="bottom-end">
-              <DropdownTrigger>
-                <Avatar
-                  isBordered
-                  as="button"
-                  className="transition-transform"
-                  color="secondary"
-                  name="Jason Hughes"
-                  size="sm"
-                  src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-                />
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Profile Actions" variant="flat">
-                <DropdownItem key="profile" className="h-14 gap-2">
-                  <p className="font-semibold">Signed in as</p>
-                  <p className="font-semibold">zoey@example.com</p>
-                </DropdownItem>
-                <DropdownItem key="settings">My Settings</DropdownItem>
-                <DropdownItem key="team_settings">Team Settings</DropdownItem>
-                <DropdownItem key="analytics">Analytics</DropdownItem>
-                <DropdownItem key="system">System</DropdownItem>
-                <DropdownItem key="configurations">Configurations</DropdownItem>
-                <DropdownItem key="help_and_feedback">
-                  Help & Feedback
-                </DropdownItem>
-                <DropdownItem key="logout" color="danger">
-                  Log Out
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </div> */}
-
-          <Link to="/auth-login" className="text-sm/6 font-semibold ">
-            <div className="flex justify-center gap-1 items-center hover:text-blue-600">
-              <LuLogIn />
-              <span>Login</span>
+          {localStorage.getItem("token") && (
+            <div className="flex items-center">
+              <Dropdown placement="bottom-end">
+                <DropdownTrigger>
+                  <Avatar
+                    isBordered
+                    as="button"
+                    className="transition-transform"
+                    color="secondary"
+                    name="Jason Hughes"
+                    size="sm"
+                    src={user.avatar}
+                  />
+                </DropdownTrigger>
+                <DropdownMenu aria-label="Profile Actions" variant="flat">
+                  <DropdownItem key="profile" className="h-14 gap-2">
+                    <p className="font-semibold">Signed in as</p>
+                    <p className="font-semibold">{user.email}</p>
+                  </DropdownItem>
+                  <DropdownItem key="settings">My Settings</DropdownItem>
+                  <DropdownItem key="logout" color="danger" onClick={_logout}>
+                    Log Out
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
             </div>
-          </Link>
+          )}
+          {!localStorage.getItem("token") && (
+            <div className="flex items-center">
+              <Link
+                to="/auth-login"
+                className="text-sm font-semibold hover:text-blue-600 "
+              >
+                <div className="flex  gap-1 items-center hover:text-blue-600">
+                  <LuLogIn />
+                  <span>Login</span>
+                </div>
+              </Link>
+            </div>
+          )}
         </nav>
       </ClickSpark>
     </header>
